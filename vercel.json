@@ -1,0 +1,4 @@
+{
+  "framework": null,
+  "rewrites": [{ "source": "/admin", "destination": "/admin.html" }]
+}
