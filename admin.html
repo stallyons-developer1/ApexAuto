@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Apex Auto — Review Queue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0B0E11;--surface:#14181D;--surface-2:#1B212A;--surface-3:#222A34;--line:#262E39;--line-2:#33404F;
+    --ink:#EAEEF3;--ink-soft:#8A94A2;--ink-dim:#5B6675;--mint:#19E5A6;--mint-deep:#0E9E73;--mint-tint:rgba(25,229,166,.12);
+    --amber:#F5B94D;--red:#FF5D5D;--blue:#4C8DFF;
+    --sans:"Instrument Sans",-apple-system,sans-serif;--display:"Sora",var(--sans)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.15}
+  button{font-family:inherit;cursor:pointer;border:none}
+  input,textarea{font-family:inherit;font-size:14px;color:var(--ink)}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+  .topbar h1{font-size:17px}
+  .pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:100px;background:var(--surface-3);color:var(--ink-soft);white-space:nowrap}
+  .pill.approved{background:var(--mint-tint);color:var(--mint)}.pill.declined{background:rgba(255,93,93,.14);color:var(--red)}
+  .pill.review{background:rgba(245,185,77,.12);color:var(--amber)}.pill.info{background:rgba(76,141,255,.14);color:var(--blue)}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .panel h2{font-size:16px;margin-bottom:10px}
+  .list button{display:block;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;color:var(--ink)}
+  .list button.sel{border-color:var(--mint)}
+  .list .nm{font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .list .meta{font-size:12px;color:var(--ink-soft);margin-top:4px;display:flex;gap:6px;flex-wrap:wrap}
+  .ctrl{width:100%;padding:10px 12px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:10px}
+  .ctrl:focus{outline:none;border-color:var(--mint)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink);text-decoration:none}
+  .btn:hover{border-color:var(--ink-soft)}.btn:disabled{opacity:.4;pointer-events:none}
+  .btn.mint{background:linear-gradient(135deg,var(--mint),var(--mint-deep));color:#04140b;border:none}
+  .btn.red{background:rgba(255,93,93,.14);color:var(--red);border-color:rgba(255,93,93,.35)}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .who{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+  .who img{width:72px;height:72px;border-radius:12px;object-fit:cover;background:var(--surface-3);flex:none}
+  .who h3{font-size:20px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td{padding:8px 6px;border-top:1px solid var(--line);vertical-align:middle}
+  td:first-child{color:var(--ink-soft);width:150px}
+  td:last-child{text-align:right;width:70px}
+  .icm{margin-top:16px;border:1px solid rgba(76,141,255,.35);background:rgba(76,141,255,.06);border-radius:12px;padding:14px}
+  .icm h3{font-size:15px;margin-bottom:6px}
+  .icm p{font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  label.f{display:block;font-size:12.5px;font-weight:600;margin:12px 0 6px}
+  .chk{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  .muted{color:var(--ink-soft);font-size:13px}
+  .err{color:var(--red);font-size:13px;margin-top:8px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--surface-3);border:1px solid var(--line-2);padding:8px 14px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="topbar"><h1>Review Queue</h1><span class="pill">Team only</span></div>
+
+<div class="wrap">
+  <!-- key gate -->
+  <div class="panel" id="gate" style="max-width:420px;margin:40px auto">
+    <h2>Reviewer sign-in</h2>
+    <p class="muted" style="margin-bottom:12px">Enter the admin key (ADMIN_KEY).</p>
+    <input class="ctrl" id="keyIn" type="password" placeholder="Admin key" onkeydown="if(event.key==='Enter')signIn()">
+    <div class="row" style="margin-top:12px"><button class="btn mint" onclick="signIn()">Sign in</button></div>
+    <div class="err" id="gateErr"></div>
+  </div>
+
+  <div class="grid" id="app" style="display:none">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Background checks</h2><button class="btn sm" onclick="loadList()">Refresh</button></div>
+      <div class="list" id="list"><p class="muted">Loading…</p></div>
+    </div>
+    <div class="panel" id="detail"><p class="muted">Select a booking on the left.</p></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let KEY=''; try{KEY=sessionStorage.getItem('apexAdminKey')||''}catch(e){}
+let current=null;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate=s=>s?new Date(s).toLocaleString():'';
+
+async function api(qs,opts){
+  const r=await fetch('/api/admin-reviews'+(qs||''),Object.assign({headers:{'x-admin-key':KEY,'Content-Type':'application/json'}},opts||{}));
+  const d=await r.json().catch(()=>({}));
+  if(r.status===401){signOut('Wrong admin key.');throw new Error('unauthorized');}
+  if(!r.ok)throw new Error(d.error||('HTTP '+r.status));
+  return d;
+}
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600);}
+
+function signIn(){KEY=keyIn.value.trim();if(!KEY)return;try{sessionStorage.setItem('apexAdminKey',KEY)}catch(e){}start();}
+function signOut(msg){KEY='';try{sessionStorage.removeItem('apexAdminKey')}catch(e){}app.style.display='none';gate.style.display='';gateErr.textContent=msg||'';}
+async function start(){
+  gateErr.textContent='';
+  try{await loadList();gate.style.display='none';app.style.display='';}
+  catch(e){if(e.message!=='unauthorized')gateErr.textContent=e.message;}
+}
+
+const STATUS={manual_review:['review','Waiting for review'],bg_clear:['approved','Approved'],declined_background:['declined','Declined'],checking:['info','TruthFinder checking…']};
+const TF_STAGE={starting:'Starting',logging_in:'Logging in',searching:'Searching',matching:'Matching results',reading_report:'Reading report',done:'Done',failed:'Stopped'};
+
+// TruthFinder worker panel: what it did, why it stopped, debug snapshots, retry
+function tfPanel(d){
+  const tf=d.tf;if(!tf&&d.status!=='checking')return '';
+  const t=tf||{};
+  const res=t.result==='clear'?'<span style="color:var(--mint)">Clear — same person, no flagged records</span>'
+    :t.result==='review'?`<span style="color:var(--amber)">Sent to review${t.reason?' — '+esc(t.reason):''}</span>`:'';
+  return `<div class="icm" style="margin:0 0 14px"><h3>TruthFinder (automatic)</h3>
+    <p>Stage: <b>${esc(TF_STAGE[t.stage]||t.stage||'Queued')}</b>${t.results_seen!=null?` · results seen: ${t.results_seen}, fitting the ID: ${t.results_fit}`:''}<br>${res}
+    ${t.error?`<br><span style="color:var(--red)">${esc(t.error)}</span>`:''}</p>
+    ${(t.snapshots||[]).length?`<p style="margin-bottom:6px">Debug snapshots:</p><div class="row" style="gap:6px">${t.snapshots.map(s=>
+      `<button class="btn sm" onclick="openSnap('${esc(d.booking_id)}','${esc(s)}.png')">${esc(s)}</button><button class="btn sm" onclick="openSnap('${esc(d.booking_id)}','${esc(s)}.html')">html</button>`).join('')}</div>`:''}
+    ${(t.log||[]).length?`<p style="margin:10px 0 6px">Run log:</p><pre style="margin:0;max-height:240px;overflow:auto;background:#07090c;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:11.5px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap">${
+      t.log.map(l=>`<span style="color:${l.level==='error'?'#ff8a8a':l.level==='warn'?'#f5c56b':'#b9c2cf'}">${esc(new Date(l.t).toLocaleTimeString()+'  '+l.m)}</span>`).join('\n')}</pre>`:''}
+    ${d.status!=='checking'?`<div class="row" style="margin-top:10px"><button class="btn sm" onclick="retryTF()">↻ Run TruthFinder again</button></div>`:''}</div>`;
+}
+async function openSnap(bk,file){
+  const r=await fetch('/api/admin-reviews?booking='+encodeURIComponent(bk)+'&snapshot='+encodeURIComponent(file),{headers:{'x-admin-key':KEY}});
+  if(!r.ok){toast('Snapshot not found');return;}
+  window.open(URL.createObjectURL(await r.blob()),'_blank');
+}
+async function retryTF(){
+  try{await api('',{method:'POST',body:JSON.stringify({booking:current,action:'retry_truthfinder'})});toast('TruthFinder queued');await loadList();await openBooking(current);}
+  catch(e){if(e.message!=='unauthorized')toast(e.message);}
+}
+function statusPill(st){const s=STATUS[st]||['',st||'—'];return `<span class="pill ${s[0]}">${esc(s[1])}</span>`;}
+function sourcePill(src){return src==='didit'?'<span class="pill info">ID verified (Didit)</span>':`<span class="pill">ID ${esc(src||'—')}</span>`;}
+
+async function loadList(){
+  const d=await api('');
+  list.innerHTML=d.items.length?d.items.map(s=>`<button data-bk="${esc(s.booking_id)}" class="${current===s.booking_id?'sel':''}" onclick="openBooking('${esc(s.booking_id)}')">
+    <div class="nm"><span>${esc(s.name||'(no name)')}</span></div>
+    <div class="meta">${statusPill(s.status)}${sourcePill(s.id_source)}</div>
+    <div class="meta">${esc(s.booking_id)} · ${esc(fmtDate(s.submitted_at))}</div></button>`).join(''):'<p class="muted">No background checks submitted yet. They appear here when a customer submits step 2.</p>';
+}
+
+async function openBooking(bk){
+  current=bk;
+  document.querySelectorAll('#list button').forEach(b=>b.classList.toggle('sel',b.dataset.bk===bk));
+  detail.innerHTML='<p class="muted">Loading…</p>';
+  try{
+    const d=await api('?booking='+encodeURIComponent(bk));
+    const i=d.identity||d.verified_identity||{},rv=d.review||{},bkg=d.booking||{};
+    // pre-tick the identity match when the automatic check already matched exactly one person
+    const rc=d.report_check,m=rv.match||(rc&&rc.matched&&(!d.tf||d.tf.results_fit===1)?{age:rc.match.dob,location:rc.match.state,single:true}:{});
+    if(d.status==='checking'){clearTimeout(openBooking.t);openBooking.t=setTimeout(()=>{if(current===bk)openBooking(bk);},5000);} // live refresh while the worker runs
+    if(!i.age&&i.date_of_birth){const b=new Date(i.date_of_birth),n=new Date();i.age=n.getFullYear()-b.getFullYear()-((n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))?1:0);}
+    const rows=[['First name',i.first_name],['Last name',i.last_name],['Date of birth',i.date_of_birth],['Age',i.age],
+      ['State',i.issuing_state],['Address',i.address],['Document',i.document_type],['License / ID #',i.document_number],['Expires',i.expiration_date]];
+    const searchText=[[i.first_name,i.last_name].filter(Boolean).join(' '),i.issuing_state,i.age?('age '+i.age):''].filter(Boolean).join(', ');
+    detail.innerHTML=`
+      <div class="who">${i.portrait_image?`<img src="${esc(i.portrait_image)}" alt="">`:'<img alt="">'}
+        <div><h3>${esc(i.full_name||d.name||'No name')}</h3><div class="row" style="margin-top:6px">${statusPill(d.status)}${sourcePill(d.id_source)}</div>
+        <div class="muted" style="margin-top:4px">${esc(d.booking_id)} · submitted ${esc(fmtDate(d.submitted_at))}</div>
+        <div class="muted">${esc(bkg.pickup_date)} → ${esc(bkg.return_date)}${bkg.days?' ('+bkg.days+' days)':''} · ${esc(bkg.pickup)} → ${esc(bkg.dropoff)}</div></div></div>
+      ${d.id_source==='didit'?'':'<p class="muted" style="margin-bottom:10px">Test mode: the customer skipped ID verification and typed these details. They are not verified.</p>'}
+      ${tfPanel(d)}
+      ${d.report_check?(()=>{const c=d.report_check,ok=v=>v?'✓':'✗';return `<div class="icm" style="margin:0 0 14px"><h3>Report check</h3>
+        <p>Report: ${esc(c.report.name)} · DOB ${esc(c.report.dob||'?')} · ${esc(c.report.states.join(', '))}<br>
+        ${ok(c.match.name)} Name &nbsp; ${ok(c.match.dob)} Date of birth &nbsp; ${ok(c.match.state)} State</p>
+        ${c.records.length?c.records.map(r=>`<p style="margin:0 0 4px">• <b>${esc(r.offense)}</b> — ${esc(r.level)}, ${esc(r.date)}, ${esc(r.county)} (${esc(r.disposition)})</p>`).join(''):'<p>No criminal records in the report.</p>'}
+        ${c.flags.length?`<p style="color:var(--red)">Flags: ${esc(c.flags.join(', '))}</p>`:''}</div>`;})():''}
+      <table>${rows.map(([k,v])=>`<tr><td>${k}</td><td>${esc(v||'—')}</td><td>${v?`<button class="btn sm" data-copy="${esc(v)}" onclick="copy(this.dataset.copy)">Copy</button>`:''}</td></tr>`).join('')}</table>
+
+      <div class="icm">
+        <h3>1 · Look the person up</h3>
+        <p>Search TruthFinder (Bart's account) with the name and state exactly as on the ID above. Instant Checkmate works the same way if you prefer it.</p>
+        <div class="row">
+          <a class="btn" href="https://app.truthfinder.com/" target="_blank" rel="noopener noreferrer">Open TruthFinder ↗</a>
+          <a class="btn" href="https://www.instantcheckmate.com/" target="_blank" rel="noopener noreferrer">Open Instant Checkmate ↗</a>
+          <button class="btn" ${searchText?'':'disabled'} data-copy="${esc(searchText)}" onclick="copy(this.dataset.copy)">Copy search details</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="icmChecked" ${rv.icm_checked?'checked':''}> I searched for this person</label>
+      </div>
+
+      <div class="icm">
+        <h3>2 · Is it the same person as the ID?</h3>
+        <p>Compare the report with the verified ID above. All three must match, and only one person in the results may fit. If you're not sure, save as pending — don't guess.</p>
+        ${MATCH.map(([k,t])=>`<label class="chk"><input type="checkbox" class="mchk" data-k="${k}" ${m[k]?'checked':''} onchange="refreshDecision()"> ${t}</label>`).join('')}
+      </div>
+
+      <div class="icm">
+        <h3>3 · What does the report show?</h3>
+        <p>Tick anything found. A flag doesn't decline automatically — you decide below.</p>
+        <label class="chk"><input type="checkbox" id="fNone" ${rv.clean?'checked':''} onchange="if(this.checked)document.querySelectorAll('.fchk').forEach(c=>c.checked=false);refreshDecision()"> <b>Nothing found — clean</b></label>
+        ${FLAGS.map(f=>`<label class="chk"><input type="checkbox" class="fchk" value="${esc(f)}" ${(rv.flags||[]).includes(f)?'checked':''} onchange="if(this.checked)fNone.checked=false;refreshDecision()"> ${esc(f)}</label>`).join('')}
+        <label class="f" for="icmNotes">Notes</label>
+        <textarea class="ctrl" id="icmNotes" rows="3" placeholder="e.g. One match, same age and city. DUI 2019.">${esc(rv.icm_notes||'')}</textarea>
+      </div>
+
+      <label class="f" for="reviewer">Reviewer name</label>
+      <input class="ctrl" id="reviewer" value="${esc(rv.reviewer||'')}" placeholder="Your name">
+      <p class="muted" id="suggest" style="margin-top:12px"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn mint" id="approveBtn" onclick="decide('approve')">Approve → step 3</button>
+        <button class="btn red" onclick="decide('decline')">Decline</button>
+        <button class="btn" onclick="decide('pending')">Save as pending</button>
+      </div>
+      ${rv.reviewed_at?`<p class="muted" style="margin-top:10px">Last saved ${esc(fmtDate(rv.reviewed_at))}${rv.reviewer?' by '+esc(rv.reviewer):''}.</p>`:''}
+      <div class="err" id="saveErr"></div>`;
+    refreshDecision();
+  }catch(e){if(e.message!=='unauthorized')detail.innerHTML=`<div class="err">Could not load: ${esc(e.message)}</div>`;}
+}
+
+// Identity match + flag criteria (handoff/automation-1 — attorney to approve wording)
+const MATCH=[['age','Age / birth year matches the ID date of birth'],['location','City or state matches the ID address (current or past)'],['single','Only one person in the results fits (no look-alikes)']];
+const FLAGS=['Theft / larceny','Grand theft auto (vehicle theft)','DUI / DWI','Reckless driving','Drug possession','Felony','Suspended / revoked / expired license','Outstanding warrant or vehicle-seizure risk'];
+const checked=sel=>[...document.querySelectorAll(sel)].filter(c=>c.checked);
+
+function refreshDecision(){
+  const matched=checked('.mchk').length===MATCH.length;
+  const flags=checked('.fchk').length, clean=fNone.checked;
+  approveBtn.disabled=!matched||(!clean&&!flags);
+  suggest.textContent=!matched?'Confirm the identity match (step 2) before approving.'
+    :clean?'Suggested: approve — same person, nothing found.'
+    :flags?`Suggested: decline or review — ${flags} flag${flags>1?'s':''} found.`
+    :'Tick "Nothing found" or the flags you found.';
+}
+
+async function decide(decision){
+  if(!reviewer.value.trim()){saveErr.textContent='Add your name first.';return;}
+  const flags=checked('.fchk').map(c=>c.value);
+  if(decision==='approve'&&flags.length&&!confirm(`This person has ${flags.length} flag(s): ${flags.join(', ')}.\nApprove anyway?`))return;
+  if(decision==='decline'&&!confirm('Decline this customer? They will see "not accepted" and cannot continue.\n\nBefore go-live, a decline must be based on a compliant background report (Certn), not TruthFinder or Instant Checkmate.'))return;
+  const match=Object.fromEntries(MATCH.map(([k])=>[k,!!document.querySelector(`.mchk[data-k="${k}"]`).checked]));
+  try{
+    await api('',{method:'POST',body:JSON.stringify({booking:current,decision,icm_checked:icmChecked.checked,icm_notes:icmNotes.value,
+      match,clean:fNone.checked,flags:fNone.checked?[]:flags,reviewer:reviewer.value.trim()})});
+    toast('Saved — the customer\'s page updates automatically');await loadList();await openBooking(current);
+  }catch(e){if(e.message!=='unauthorized')saveErr.textContent=e.message;}
+}
+function copy(t){navigator.clipboard.writeText(t).then(()=>toast('Copied'),()=>toast('Copy failed'));}
+
+if(KEY)start();
+</script>
+</body>
+</html>

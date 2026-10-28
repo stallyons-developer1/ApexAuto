@@ -1,0 +1,16 @@
+{
+  "name": "truthfinder-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runs the step-2 TruthFinder check on the client's computer for the Imperium booking app",
+  "main": "truthfinder-agent.js",
+  "scripts": {
+    "start": "node truthfinder-agent.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright": "1.49.1"
+  }
+}

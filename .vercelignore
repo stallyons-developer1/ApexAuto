@@ -1,0 +1,13 @@
+# never upload local helper/secret files to the live site
+deploy.sh
+_diag.js
+*.txt
+*.md
+.env*
+.vercel
+dev-server.js
+data/
+Dockerfile
+.dockerignore
+node_modules
+agent

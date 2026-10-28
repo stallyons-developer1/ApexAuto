@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Apex Auto — Book the Corvette C8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0B0E11;--surface:#14181D;--surface-2:#1B212A;--surface-3:#222A34;--line:#262E39;--line-2:#33404F;
+    --ink:#EAEEF3;--ink-soft:#8A94A2;--ink-dim:#5B6675;--mint:#19E5A6;--mint-deep:#0E9E73;--mint-tint:rgba(25,229,166,.12);
+    --amber:#F5B94D;--red:#FF5D5D;--blue:#4C8DFF;--radius:16px;
+    --sans:"Instrument Sans",-apple-system,sans-serif;--display:"Sora",var(--sans);--shadow:0 30px 60px -30px rgba(0,0,0,.7)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;
+    background-image:radial-gradient(900px 500px at 85% -5%,rgba(25,229,166,.08),transparent 60%)}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
+  button{font-family:inherit;cursor:pointer;border:none}
+  input,select{font-family:inherit;font-size:15px;color:var(--ink)}
+  .topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:rgba(11,14,17,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:800;font-size:18px}
+  .brand .mk{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--mint),var(--mint-deep));display:grid;place-items:center;color:#04140b}
+  .brand .mk svg{width:19px;height:19px}
+  .testmode{font-size:11px;font-weight:600;color:var(--amber);background:rgba(245,185,77,.12);border:1px solid rgba(245,185,77,.3);padding:5px 11px;border-radius:100px}
+  .wrap{max-width:920px;margin:0 auto;padding:26px 22px 80px}
+  .view{display:none;animation:rise .4s ease both}.view.active{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .steps{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+  .step{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-soft);padding:8px 13px;border-radius:100px;border:1px solid var(--line);background:var(--surface)}
+  .step b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--surface-3);font-size:11px;font-family:var(--sans)}
+  .step.active{color:var(--ink);border-color:var(--mint)}.step.active b{background:var(--mint);color:#04140b}
+  .step.done b{background:var(--mint-deep);color:#fff}
+  h1.hero{font-size:clamp(28px,5vw,40px)}.hero em{font-style:normal;color:var(--mint)}
+  .lead{color:var(--ink-soft);margin-top:10px;font-size:15.5px;max-width:56ch}
+  .showcase{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;margin-top:24px}
+  @media(max-width:760px){.showcase{grid-template-columns:1fr}.row{grid-template-columns:1fr!important}}
+  #hero{height:340px;border-radius:16px;border:1px solid var(--line);background:#0f1319 center/cover no-repeat;box-shadow:var(--shadow)}
+  .thumbs{display:flex;gap:10px;margin-top:10px}
+  .thumbs button{flex:1;height:60px;border-radius:10px;border:2px solid var(--line);background:#0f1319 center/cover no-repeat;cursor:pointer}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .panel h2{font-size:22px;margin-bottom:4px}.panel .sub{color:var(--ink-soft);font-size:14px;margin-bottom:18px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  label.f{display:block}label.f span{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .ctrl{width:100%;padding:12px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:11px;transition:.15s}
+  .ctrl:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 4px var(--mint-tint)}
+  .summary{display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:16px;font-size:14px}
+  .summary .amt{font-family:var(--display);font-weight:800;font-size:20px}
+  .vcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
+  .vhead{display:flex;align-items:center;gap:13px;margin-bottom:12px}
+  .vico{width:44px;height:44px;border-radius:12px;background:var(--surface-3);display:grid;place-items:center;font-size:21px;flex:none}
+  .vhead h3{font-size:16px}.vhead p{font-size:12.5px;color:var(--ink-soft)}
+  .vhead .st{margin-left:auto;font-size:12px;font-weight:600;padding:5px 11px;border-radius:100px;background:var(--surface-3);color:var(--ink-soft)}
+  .st.run{background:rgba(76,141,255,.14);color:var(--blue)}.st.pass{background:var(--mint-tint);color:var(--mint)}.st.fail{background:rgba(255,93,93,.14);color:var(--red)}
+  .locked{opacity:.5;pointer-events:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;transition:.16s;background:var(--surface-3);border:1px solid var(--line-2);color:var(--ink)}
+  .btn:hover{border-color:var(--ink-soft)}.btn.mint{background:linear-gradient(135deg,var(--mint),var(--mint-deep));color:#04140b;border:none;font-weight:700}
+  .btn.mint:hover{box-shadow:0 12px 28px -12px var(--mint)}.btn.block{width:100%}.btn:disabled{opacity:.4;pointer-events:none}
+  .actions{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+  .note{font-size:12px;color:var(--ink-dim);margin-top:10px}
+  .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.25);border-top-color:#04140b;border-radius:50%;display:inline-block;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .result{text-align:center;padding:24px 10px}.seal{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;background:linear-gradient(135deg,var(--mint),var(--mint-deep))}
+  .seal svg{width:40px;height:40px;color:#fff}
+  .clause{background:#1A130E;border:1px solid rgba(245,185,77,.3);border-radius:12px;padding:14px 16px;margin:16px 0;font-size:13px;color:#F5D9A8;display:flex;gap:11px;text-align:left}
+  .clause svg{width:18px;height:18px;color:var(--amber);flex:none;margin-top:1px}
+  .footer{text-align:center;color:var(--ink-dim);font-size:12px;padding:18px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M6 17l-1.5-5.5a2 2 0 0 1 1.9-2.5h11.2a2 2 0 0 1 1.9 2.5L20 17"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></span>Apex Auto</div>
+  <span class="testmode">⚙️ Test build</span>
+</div>
+<div class="wrap">
+  <div class="steps" id="stepper"></div>
+
+  <!-- 0 CAR -->
+  <div class="view active" data-step="0">
+    <h1 class="hero">Corvette C8. <em>Verified in minutes.</em></h1>
+    <p class="lead">Pick your dates, pass ID + background + insurance verification, and reserve — the car is released only to the verified driver.</p>
+    <div class="showcase">
+      <div><div id="hero"></div><div class="thumbs" id="thumbs"></div></div>
+      <div class="panel">
+        <div style="color:var(--mint);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Exotic · 2024</div>
+        <h2 style="font-size:24px;margin:4px 0 10px">Corvette C8 Stingray</h2>
+        <div style="display:flex;gap:14px;color:var(--ink-soft);font-size:13px;margin-bottom:14px"><span>🏎️ 495 HP</span><span>👥 2</span><span>⚙️ Auto</span></div>
+        <div style="font-family:var(--display);font-weight:800;font-size:32px">$450<small style="font-size:14px;color:var(--ink-soft);font-weight:400">/day</small></div>
+        <div style="font-size:12.5px;color:var(--ink-dim);margin-top:3px">+ $3,000 refundable deposit</div>
+        <button class="btn mint block" style="margin-top:18px" onclick="go(1)">Book this Corvette →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 DATES -->
+  <div class="view" data-step="1">
+    <div class="panel">
+      <h2>Your rental</h2><p class="sub">Corvette C8 Stingray · $450/day</p>
+      <div class="row">
+        <label class="f"><span>Pickup date</span><input class="ctrl" type="date" id="pDate" onchange="calc()"></label>
+        <label class="f"><span>Pickup time</span><input class="ctrl" type="time" id="pTime" value="10:00" onchange="calc()"></label>
+        <label class="f"><span>Return date</span><input class="ctrl" type="date" id="rDate" onchange="calc()"></label>
+        <label class="f"><span>Return time</span><input class="ctrl" type="time" id="rTime" value="10:00" onchange="calc()"></label>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <label class="f"><span>📍 Pickup</span><select class="ctrl" id="pickLoc" onchange="calc()"><option>Apex Lot — Downtown</option><option>Airport Terminal</option></select></label>
+        <label class="f"><span>🏁 Drop-off</span><select class="ctrl" id="dropLoc" onchange="calc()"><option>Same as pickup</option><option>Apex Lot — Downtown</option><option>Airport Terminal</option></select></label>
+      </div>
+      <div class="summary"><span id="dSum">Select your dates</span><span class="amt" id="dTotal">—</span></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="go(0)">← Back</button><button class="btn mint" id="toVerify" onclick="go(2)" disabled>Continue to verification →</button></div>
+  </div>
+
+  <!-- 2 VERIFY -->
+  <div class="view" data-step="2">
+    <div style="margin-bottom:16px"><h2 style="font-size:22px">Verification — one step at a time</h2><p class="sub" style="color:var(--ink-soft);margin-top:6px">If any step fails, the rental is declined and you're not charged. Payment happens only after all pass.</p></div>
+
+    <div class="vcard">
+      <div class="vhead"><div class="vico">🪪</div><div><h3>1 · Driver's license (ID + face match)</h3><p>Secure verification by Didit — you'll do it on their page, then return here.</p></div><span class="st" id="stID">Pending</span></div>
+      <div id="idMsg" class="note"></div>
+      <button class="btn mint" style="margin-top:12px" id="idBtn" onclick="startID()">🔎 Verify my ID</button>
+      <div id="idSkip" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+        <div class="note" style="margin:0 0 10px">⚙️ Test mode — instead of Didit, enter the identity as it appears on the license.</div>
+        <div class="row"><label class="f"><span>First name</span><input class="ctrl" id="idtFirst" placeholder="KaShawn"></label>
+        <label class="f"><span>Middle name (optional)</span><input class="ctrl" id="idtMiddle" placeholder="Nicola"></label></div>
+        <label class="f" style="margin-top:12px"><span>Last name</span><input class="ctrl" id="idtLast" placeholder="Roper"></label>
+        <div class="row" style="margin-top:12px"><label class="f"><span>Date of birth (optional)</span><input class="ctrl" id="idtDob" type="date"></label>
+        <label class="f"><span>License state</span><input class="ctrl" id="idtState" maxlength="2" placeholder="FL" style="text-transform:uppercase"></label></div>
+        <label class="f" style="margin-top:12px"><span>Phone number</span><input class="ctrl" id="idtPhone" type="tel" placeholder="(205) 555-0123"></label>
+        <button class="btn" style="margin-top:12px" onclick="useTestIdentity()">Use this identity (test) →</button>
+      </div>
+    </div>
+
+    <div class="vcard locked" id="bgCard">
+      <div class="vhead"><div class="vico">🛡️</div><div><h3>2 · Background check</h3><p>Criminal + driving record, reviewed by our team.</p></div><span class="st" id="stBG">Locked</span></div>
+      <div id="bgForm">
+        <div id="bgManual" style="display:none">
+          <div class="row"><label class="f"><span>First name</span><input class="ctrl" id="bgFirst" autocomplete="given-name"></label>
+          <label class="f"><span>Last name</span><input class="ctrl" id="bgLast" autocomplete="family-name"></label></div>
+          <div class="row" style="margin-top:12px"><label class="f"><span>Date of birth</span><input class="ctrl" id="bgDob" type="date"></label>
+          <label class="f"><span>License state</span><input class="ctrl" id="bgState" maxlength="2" placeholder="FL" style="text-transform:uppercase"></label></div>
+          <div class="note">⚙️ Test mode — ID was skipped, so enter your details as they appear on your license.</div>
+        </div>
+        <div id="bgPdf" style="display:none;margin-top:4px">
+          <label class="f"><span>Background report (PDF)</span><input class="ctrl" id="bgFile" type="file" accept="application/pdf,.pdf"></label>
+          <div class="note">⚙️ Test mode — upload the report; it's matched against the step 1 identity and checked for criminal records.
+            Demo files: <a href="demo-reports/demo-report-clean.pdf" target="_blank" style="color:var(--mint)">clean</a> ·
+            <a href="demo-reports/demo-report-criminal.pdf" target="_blank" style="color:var(--mint)">criminal record</a> ·
+            <a href="demo-reports/demo-report-other-person.pdf" target="_blank" style="color:var(--mint)">other person</a>
+            (identity: Claire Stone, 02/07/1990, FL)</div>
+        </div>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-soft);margin-top:12px"><input type="checkbox" id="bgConsent" style="margin-top:3px"> <span>I authorize Imperium Luxury Concierge to obtain a background and driving-record check about me for this rental.</span></label>
+      </div>
+      <div id="bgMsg" class="note"></div>
+      <button class="btn mint" style="margin-top:12px" id="bgBtn" onclick="runBG()">🔎 Submit for background check</button>
+      <button class="btn" style="margin-top:12px;display:none" id="bgSkip" onclick="skipBG()">Skip for now (test) →</button>
+      <div id="bgLogBox" style="display:none;margin-top:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink-soft)">⚙️ TruthFinder live log (test)</span>
+          <button class="btn" style="padding:5px 10px;font-size:12px" onclick="copyBgLog()">Copy log</button>
+        </div>
+        <pre id="bgLog" style="margin:0;max-height:260px;overflow:auto;background:#07090c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#b9c2cf;white-space:pre-wrap;word-break:break-word"></pre>
+      </div>
+    </div>
+
+    <div class="vcard locked" id="insCard">
+      <div class="vhead"><div class="vico">📄</div><div><h3>3 · Insurance coverage</h3><p>Confirm your policy covers this vehicle.</p></div><span class="st" id="stIns">Locked</span></div>
+      <div id="insForm">
+        <div class="row"><label class="f"><span>Provider</span><select class="ctrl" id="insProv" onchange="insOther.style.display=this.value==='Other'?'':'none'"><option value="">Select…</option>
+          <option>State Farm</option><option>GEICO</option><option>Progressive</option><option>Allstate</option><option>Liberty Mutual</option>
+          <option>Farmers Insurance</option><option>Nationwide</option><option>USAA</option><option>Travelers</option><option>Erie Insurance</option>
+          <option value="Other">Other (enter from your card)</option></select></label>
+        <label class="f"><span>Policy number</span><input class="ctrl" id="insPol" placeholder="VA-88213004"></label></div>
+        <div class="row" id="insOther" style="display:none;margin-top:12px"><label class="f"><span>Insurer name</span><input class="ctrl" id="insOtherName"></label>
+        <label class="f"><span>Insurer phone (on your card)</span><input class="ctrl" id="insOtherPhone" placeholder="(800) 555-0123"></label></div>
+        <div id="insHolderRow" style="display:none;margin-top:12px">
+          <div class="row"><label class="f"><span>Policyholder full name</span><input class="ctrl" id="insHolder" placeholder="As on your policy"></label>
+          <label class="f"><span>Date of birth</span><input class="ctrl" id="insDob" type="date"></label></div>
+          <label class="f" style="margin-top:12px"><span>Address on the policy</span><input class="ctrl" id="insAddr" placeholder="Street, city, state"></label>
+          <div class="note">⚙️ Test mode — ID was skipped, so enter these as they appear on your policy.</div></div>
+        <div class="row" style="margin-top:12px"><label class="f"><span>ZIP code (optional)</span><input class="ctrl" id="insZip" maxlength="10" placeholder="33101"></label>
+        <label class="f"><span>Phone on the policy (optional)</span><input class="ctrl" id="insPhone" placeholder="(305) 555-0123"></label></div>
+        <div class="note">Your insurer may ask for these to find your policy. We only share them if asked.</div>
+        <div id="insTestRow" style="display:none;margin-top:12px"><label class="f"><span>Test: call this number instead of the insurer</span><input class="ctrl" id="insTestNum" type="tel" placeholder="+1 (302) 219-3669"></label>
+          <div class="note">⚙️ Test mode — leave empty to use the default test number / the insurer. US numbers only.</div></div>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-soft);margin-top:12px"><input type="checkbox" id="insConsent" style="margin-top:3px"> <span>I authorize Imperium Luxury Concierge to call my insurer on my behalf to verify my coverage for this rental. The call is placed by an automated assistant and may be recorded.</span></label>
+      </div>
+      <div id="insMsg" class="note"></div>
+      <button class="btn mint" style="margin-top:12px" id="insBtn" onclick="runIns()">🤖 Verify insurance</button>
+      <div id="insReset" style="display:none;margin-top:12px;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="resetIns()">↻ Retry insurance (test)</button>
+        <button class="btn" onclick="resetAll()">Start over (test)</button>
+      </div>
+    </div>
+
+    <div id="declineNote"></div>
+    <div class="actions"><button class="btn" onclick="go(1)">← Back</button><button class="btn mint" id="toCheckout" onclick="go(3)" disabled>Continue to checkout →</button></div>
+  </div>
+
+  <!-- 3 CHECKOUT -->
+  <div class="view" data-step="3">
+    <div class="panel">
+      <h2>Reserve your Corvette</h2><p class="sub">You're verified ✓ — enter your details to create the booking and pay.</p>
+      <div id="coSummary"></div>
+      <div class="row" style="margin-top:16px">
+        <label class="f"><span>Full name</span><input class="ctrl" id="cName" placeholder="Jane Driver"></label>
+        <label class="f"><span>Email</span><input class="ctrl" id="cEmail" type="email" placeholder="jane@email.com"></label>
+        <label class="f"><span>Phone</span><input class="ctrl" id="cPhone" placeholder="(555) 123-4567"></label>
+        <div></div>
+      </div>
+      <div class="clause"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span><b>Pickup policy:</b> the car is released only to the verified driver. If anyone else attempts pickup, the rental is cancelled and the deposit forfeited.</span></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="go(2)">← Back</button><button class="btn mint" id="payBtn" onclick="reserve()">Create booking &amp; pay →</button></div>
+  </div>
+
+  <!-- 4 DONE / DECLINED -->
+  <div class="view" data-step="4"><div class="panel"><div class="result" id="resultBox"></div></div></div>
+</div>
+<div class="footer">Apex Auto · verified rentals · Social Bull Agency</div>
+
+<script>
+const IMAGES=['https://i0.wp.com/imperiumway.com/wp-content/uploads/2026/07/A-23.jpg?ssl=1','https://i0.wp.com/imperiumway.com/wp-content/uploads/2026/07/A-32.jpg?ssl=1','https://i0.wp.com/imperiumway.com/wp-content/uploads/2026/07/A-01.jpg?ssl=1'];
+const DAY=450, DEP=3000;
+const ALLOW_ID_SKIP=true; // TEST ONLY — lets testers skip Didit to reach step 2. Set false before go-live.
+// Step 2 mode: 'normal' = submit; the server runs the automatic TruthFinder check when TF_ENABLED=true
+//                         (otherwise it goes to the team's review queue in admin.html)
+//              'pdf'    = TEST: upload a background report PDF, matched automatically against the step 1 identity
+const BG_MODE='normal';
+// FLOW 'background': steps 2 + 3 only collect consent / policy details; the checks run on the server after the
+//                    customer submits at checkout, and the result (approved + pay link / declined / review) is emailed
+//      'live':       the page waits for each check (step 2, then step 3) before checkout
+const FLOW='background';
+let S=load();
+if(!S.booking){S.booking='bk-'+Date.now();save();}
+function load(){try{return JSON.parse(localStorage.getItem('apexBk'))||{}}catch(e){return {}}}
+function save(){localStorage.setItem('apexBk',JSON.stringify(S));}
+const money=n=>'$'+Math.round(n).toLocaleString();
+const NAMES=['Car','Dates','Verify','Checkout','Done'];
+let step=0;
+
+function renderSteps(){document.getElementById('stepper').innerHTML=NAMES.map((n,i)=>`<div class="step ${i===step?'active':(i<step?'done':'')}"><b>${i<step?'✓':i+1}</b>${n}</div>`).join('');}
+function go(n){step=n;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',+v.dataset.step===n));if(n===3)renderCheckout();renderSteps();window.scrollTo({top:0,behavior:'smooth'});}
+
+/* showcase */
+document.getElementById('hero').style.backgroundImage=`url('${IMAGES[0]}')`;
+document.getElementById('thumbs').innerHTML=IMAGES.map((s,i)=>`<button style="border-color:${i===0?'var(--mint)':'var(--line)'};background-image:url('${s}')" onclick="setHero(${i})" data-i="${i}"></button>`).join('');
+function setHero(i){document.getElementById('hero').style.backgroundImage=`url('${IMAGES[i]}')`;document.querySelectorAll('.thumbs button').forEach(b=>b.style.borderColor=(+b.dataset.i===i)?'var(--mint)':'var(--line)');}
+
+/* dates */
+function calc(){
+  const pd=pDate.value,rd=rDate.value;
+  S.pickup=pickLoc.value; S.dropoff=(dropLoc.value==='Same as pickup')?pickLoc.value:dropLoc.value;
+  S.pDate=pd;S.pTime=pTime.value;S.rDate=rd;S.rTime=rTime.value;
+  if(!pd||!rd){dSum.textContent='Select your dates';dTotal.textContent='—';toVerify.disabled=true;save();return;}
+  let days=Math.ceil((new Date(rd+'T'+(rTime.value||'10:00'))-new Date(pd+'T'+(pTime.value||'10:00')))/864e5);
+  if(isNaN(days)||days<1){dSum.textContent='Return must be after pickup';dTotal.textContent='—';toVerify.disabled=true;save();return;}
+  S.days=days;S.total=days*DAY;
+  dSum.innerHTML=`${days} day${days>1?'s':''} @ ${money(DAY)}/day<br><span style="color:var(--ink-dim);font-size:12px">${S.pickup} → ${S.dropoff}</span>`;
+  dTotal.textContent=money(S.total);toVerify.disabled=false;save();
+}
+
+/* 1 — ID (real Didit) */
+async function startID(){
+  idBtn.disabled=true;idBtn.innerHTML='<span class="spin"></span> Starting…';
+  try{
+    const r=await fetch('/api/didit-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({booking:S.booking})});
+    const d=await r.json();
+    if(!d.url)throw new Error(d.error||'no url');
+    S.session_id=d.session_id;save();
+    window.location.href=d.url; // go to Didit hosted verification
+  }catch(e){idBtn.disabled=false;idBtn.textContent='🔎 Verify my ID';document.getElementById('idMsg').textContent='Could not start verification: '+e.message;}
+}
+async function pollID(){
+  if(!S.session_id)return;
+  setSt('stID','run','Checking…');document.getElementById('idMsg').innerHTML='<span class="spin" style="border-top-color:var(--blue)"></span> Confirming your verification result…';
+  idBtn.style.display='none';
+  const tick=async()=>{
+    if(S.idSkipped)return; // tester skipped while polling
+    try{
+      const r=await fetch('/api/didit-status?session_id='+encodeURIComponent(S.session_id));
+      const d=await r.json();
+      const st=(d.status||'').toLowerCase();
+      if(st==='approved'){S.id=true;save();idSkip.style.display='none';setSt('stID','pass','Verified ✓');document.getElementById('idMsg').textContent='';unlockBG();return;}
+      if(st==='declined'||st==='abandoned'){setSt('stID','fail','Not verified');decline('We couldn\'t verify your ID.');return;}
+      setTimeout(tick,3000); // still in progress
+    }catch(e){setTimeout(tick,4000);}
+  };
+  tick();
+}
+
+/* TEST ONLY — the identity typed in step 1 stands in for the Didit result */
+function useTestIdentity(){
+  const t={first_name:idtFirst.value.trim(),middle_name:idtMiddle.value.trim(),last_name:idtLast.value.trim(),date_of_birth:idtDob.value,issuing_state:idtState.value.trim().toUpperCase(),phone:idtPhone.value.trim()};
+  if(!t.first_name||!t.last_name||t.issuing_state.length!==2){alert('Enter first name, last name and 2-letter license state.');return;}
+  if(t.phone&&t.phone.replace(/\D/g,'').length<10){alert('Enter a 10-digit US phone number (or leave it empty).');return;}
+  S.testIdentity=t;save();skipID();
+}
+function skipID(){
+  S.idSkipped=true;save();
+  setSt('stID','','Test identity');idBtn.style.display='none';idSkip.style.display='none';
+  const t=S.testIdentity;
+  document.getElementById('idMsg').textContent=t?`Test identity: ${t.first_name}${t.middle_name?' '+t.middle_name:''} ${t.last_name} · DOB ${t.date_of_birth||"not given"} · ${t.issuing_state}${t.phone?' · '+t.phone:''}`:'ID verification skipped for testing.';
+  if(t){bgFirst.value=t.first_name;bgLast.value=t.last_name;bgDob.value=t.date_of_birth;bgState.value=t.issuing_state;
+    if(!insHolder.value)insHolder.value=t.first_name+' '+t.last_name;if(!insDob.value)insDob.value=t.date_of_birth;if(t.phone&&!insPhone.value)insPhone.value=t.phone;}
+  bgManual.style.display=t?'none':'';
+  unlockBG();
+}
+
+// pdf.js (cdnjs) — read the uploaded report's text in the browser, line by line
+async function pdfText(file){
+  if(!window.pdfjsLib){
+    await new Promise((ok,fail)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=ok;s.onerror=()=>fail(new Error('could not load the PDF reader'));document.head.appendChild(s);});
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const doc=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const lines=[];
+  for(let p=1;p<=doc.numPages;p++){
+    const items=(await (await doc.getPage(p)).getTextContent()).items;
+    let y=null,cur=[];
+    for(const it of items){const iy=Math.round(it.transform[5]);if(y!==null&&Math.abs(iy-y)>2){lines.push(cur.join(' '));cur=[];}y=iy;if(it.str.trim())cur.push(it.str);}
+    if(cur.length)lines.push(cur.join(' '));
+  }
+  return lines.join('\n');
+}
+
+/* 2 — background: 'normal' = team review queue (admin.html); 'pdf' = TEST report upload, matched automatically */
+async function runBG(){
+  if(!bgConsent.checked){alert('Please tick the authorization box to continue.');return;}
+  const body={booking:S.booking,consent:true,days:S.days,pickup:S.pickup,dropoff:S.dropoff,dates:{pickup:S.pDate,return:S.rDate}};
+  if(S.id)body.session_id=S.session_id;
+  else{
+    body.identity={first_name:bgFirst.value.trim(),last_name:bgLast.value.trim(),date_of_birth:bgDob.value,issuing_state:bgState.value.trim(),phone:(S.testIdentity&&S.testIdentity.phone)||'',middle_name:(S.testIdentity&&S.testIdentity.middle_name)||''};
+    if(!body.identity.first_name||!body.identity.last_name||body.identity.issuing_state.length!==2){alert('Enter your first name, last name and 2-letter license state.');return;}
+  }
+  if(FLOW==='background'){ // nothing runs now — remembered and sent with the checkout submit
+    S.bgReady=true;S.bgIdentity=body.identity||null;save();markBgReady();return;
+  }
+  const pdfMode=BG_MODE==='pdf'&&ALLOW_ID_SKIP;
+  if(pdfMode&&!bgFile.files[0]){alert('Upload the background report PDF.');return;}
+  bgBtn.disabled=true;setSt('stBG','run',pdfMode?'Reading report…':'Submitting…');
+  try{
+    if(pdfMode)body.report_text=await pdfText(bgFile.files[0]);
+    setSt('stBG','run','Checking…');
+    const r=await fetch('/api/background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'could not submit');
+    S.bgSubmitted=true;if(d.check)S.bgCheck=d.check;save();showBG(d.status);
+    if(d.status==='checking'&&ALLOW_ID_SKIP){bgLogBox.style.display='';bgLog.textContent='Waiting for the TruthFinder worker…';}
+  }catch(e){bgBtn.disabled=false;setSt('stBG','','Ready');bgMsg.textContent='Could not submit: '+e.message;}
+}
+// TEST ONLY: the TruthFinder worker's log under step 2, so issues can be seen live and copied
+const LOG_COLOR={error:'#ff8a8a',warn:'#f5c56b',info:'#b9c2cf'};
+function bgLogText(lines){return lines.map(l=>`${new Date(l.t).toLocaleTimeString()}  ${l.level==='info'?'':l.level.toUpperCase()+'  '}${l.m}`).join('\n');}
+function renderBgLog(lines){
+  if(!ALLOW_ID_SKIP||!lines||!lines.length)return;
+  S.bgLog=lines;save();
+  bgLogBox.style.display='';
+  const atBottom=bgLog.scrollHeight-bgLog.scrollTop-bgLog.clientHeight<30;
+  const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  bgLog.innerHTML=lines.map(l=>`<span style="color:${LOG_COLOR[l.level]||LOG_COLOR.info}">${esc(bgLogText([l]))}</span>`).join('\n');
+  if(atBottom)bgLog.scrollTop=bgLog.scrollHeight;
+}
+function copyBgLog(){
+  const txt=`Booking ${S.booking}\n`+bgLogText(S.bgLog||[]);
+  navigator.clipboard.writeText(txt).then(()=>alert('Log copied — paste it in the chat.'),()=>alert('Could not copy — select the log text and copy it manually.'));
+}
+
+// TEST ONLY: what the report check found (a real customer never sees this)
+function bgCheckHtml(c){
+  if(!c)return '';
+  const m=c.match,ok=v=>v?'<span style="color:var(--mint)">✓</span>':'<span style="color:var(--red)">✗</span>';
+  return `<div style="margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;font-size:13px;color:var(--ink-soft)">
+    <b style="color:var(--ink)">Report check (test view)</b> — report: ${c.report.name||'?'} · DOB ${c.report.dob||'?'} · ${c.report.states.join(', ')||'?'}<br>
+    ${ok(m.name)} Name &nbsp; ${ok(m.dob)} Date of birth &nbsp; ${ok(m.state)} State &nbsp; · &nbsp;
+    ${c.flags.length?`<span style="color:var(--red)">${c.records} record(s): ${c.flags.join(', ')}</span>`:'<span style="color:var(--mint)">No criminal records</span>'}</div>`;
+}
+function showBG(status,d){
+  bgForm.style.display='none';bgBtn.style.display='none';bgSkip.style.display='none';
+  const check=ALLOW_ID_SKIP?bgCheckHtml(S.bgCheck):'';
+  // the automatic check hit an error / was stopped: progress stops here — no spinner, no polling, no step 3
+  if(d&&d.failed&&status!=='bg_clear'&&status!=='declined_background'){
+    clearTimeout(showBG.t);
+    setSt('stBG','fail','Check stopped');
+    const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    bgMsg.innerHTML=ALLOW_ID_SKIP
+      ?`<div class="clause" style="border-color:rgba(255,93,93,.35);background:#1F1010;color:#F5B8B8;margin-top:6px"><span><b>Stopped:</b> ${esc(d.error||'the background check could not finish')}</span></div>
+        <button class="btn" style="margin-top:10px" onclick="retryBG()">↻ Retry check (test)</button>`
+      :'We couldn\'t complete your background check automatically. Our team will review it and contact you.';
+    return;
+  }
+  if(status==='bg_clear'){S.bg=true;save();setSt('stBG','pass','Clear ✓');bgMsg.innerHTML=check;unlockIns();return;}
+  if(status==='declined_background'){clearTimeout(showBG.t);setSt('stBG','fail','Rejected');bgMsg.innerHTML=check;decline('We\'re unable to accept this rental.');return;}
+  if(status==='checking'){ // the server is running the automatic background check (TruthFinder worker)
+    setSt('stBG','run','Checking records…');
+    bgMsg.innerHTML='<span class="spin" style="border-top-color:var(--blue)"></span> We\'re checking your background and driving records. This usually takes a few minutes — keep this page open.';
+    clearTimeout(showBG.t);showBG.t=setTimeout(pollBG,4000);return;
+  }
+  setSt('stBG','run','Under review');
+  bgMsg.innerHTML='<span class="spin" style="border-top-color:var(--blue)"></span> Your booking is under review — we\'ll email you shortly. You can keep this page open.'+check;
+  clearTimeout(showBG.t);showBG.t=setTimeout(pollBG,5000);
+}
+async function pollBG(){
+  try{
+    const r=await fetch('/api/background?booking='+encodeURIComponent(S.booking));
+    if(r.status===404){S.bgSubmitted=false;save();bgForm.style.display='';bgBtn.style.display='';bgBtn.disabled=false;unlockBG();bgMsg.textContent='';return;}
+    const d=await r.json();if(d.check){S.bgCheck=d.check;save();}if(d.log)renderBgLog(d.log);showBG(d.status,d);
+  }catch(e){showBG.t=setTimeout(pollBG,8000);}
+}
+// TEST ONLY: run the automatic check again after it stopped
+async function retryBG(){
+  try{
+    const r=await fetch('/api/background',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'retry',booking:S.booking})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'could not retry');
+    delete S.bgCheck;save();bgLog.textContent='Retrying — waiting for the TruthFinder check…';
+    showBG(d.status);
+  }catch(e){alert('Could not retry: '+e.message);}
+}
+function restoreBG(){
+  if(S.bgLog)renderBgLog(S.bgLog);
+  if(S.bg){bgForm.style.display='none';bgBtn.style.display='none';bgSkip.style.display='none';setSt('stBG','pass','Clear ✓');if(ALLOW_ID_SKIP)bgMsg.innerHTML=bgCheckHtml(S.bgCheck);unlockIns();restoreIns();}
+  else if(S.bgSkipped){skipBG();restoreIns();}
+  else if(S.bgSubmitted)pollBG();
+}
+function skipBG(){
+  S.bgSkipped=true;save();
+  bgForm.style.display='none';bgBtn.style.display='none';bgSkip.style.display='none';
+  setSt('stBG','','Skipped (test)');bgMsg.textContent='Background check skipped for testing.';
+  unlockIns();
+}
+function unlockBG(){
+  unlock('bgCard','stBG');
+  bgPdf.style.display=BG_MODE==='pdf'&&ALLOW_ID_SKIP&&FLOW!=='background'?'':'none';
+  bgBtn.innerHTML=FLOW==='background'?'Continue →':BG_MODE==='pdf'&&ALLOW_ID_SKIP?'🔎 Check report':'🔎 Submit for background check';
+  if(ALLOW_ID_SKIP&&FLOW!=='background'&&!S.bg&&!S.bgSkipped&&!S.bgSubmitted)bgSkip.style.display=''; // TEST ONLY
+  if(FLOW==='background'&&S.bgReady)markBgReady();
+}
+function unlockIns(){insHolderRow.style.display=S.id?'none':'';insTestRow.style.display=ALLOW_ID_SKIP?'':'none';insReset.style.display=ALLOW_ID_SKIP&&FLOW!=='background'?'flex':'none';unlock('insCard','stIns');
+  if(FLOW==='background'){insBtn.innerHTML='Continue to checkout →';if(S.insReady)markInsReady();}}
+
+/* background flow: steps 2 + 3 are only collected here; they run after the checkout submit */
+function markBgReady(){
+  bgForm.style.display='none';bgBtn.style.display='none';bgSkip.style.display='none';
+  setSt('stBG','pass','Ready ✓');bgMsg.textContent='Your background check will run after you submit — no need to wait here.';
+  unlockIns();
+}
+function markInsReady(){
+  insForm.style.display='none';insBtn.style.display='none';
+  setSt('stIns','pass','Ready ✓');insMsg.textContent=`We'll confirm your ${S.insPayload?S.insPayload.insurer:''} policy with your insurer after you submit.`;
+  toCheckout.disabled=false;
+}
+
+/* TEST ONLY — rerun step 3 without clearing browser storage by hand.
+   A new booking id is needed because the server places only one call per booking. */
+function resetIns(){
+  clearTimeout(showIns.t);
+  S.booking='bk-'+Date.now();delete S.ins;delete S.insSubmitted;save();
+  location.reload();
+}
+function resetAll(){
+  clearTimeout(showIns.t);clearTimeout(showBG.t);
+  try{localStorage.removeItem('apexBk')}catch(e){}
+  location.href=location.pathname;
+}
+
+/* 3 — insurance: an AI phone agent (Vapi) calls the insurer; we poll for the outcome */
+async function runIns(){
+  if(!insProv.value||!insPol.value.trim()){alert('Add your provider and policy number.');return;}
+  if(insProv.value==='Other'&&!insOtherPhone.value.trim()){alert('Enter the insurer phone number from your card.');return;}
+  if(!S.id&&!insHolder.value.trim()){alert('Enter the policyholder name.');return;}
+  if(!insConsent.checked){alert('Please tick the authorization box to continue.');return;}
+  const body={booking:S.booking,insurer:insProv.value,policy_number:insPol.value.trim(),consent:true,
+    other_name:insOtherName.value.trim(),other_phone:insOtherPhone.value.trim(),zip:insZip.value.trim(),phone:insPhone.value.trim(),
+    dates:{pickup:S.pDate,return:S.rDate}};
+  if(S.id)body.session_id=S.session_id;
+  else{body.holder_name=insHolder.value.trim();body.dob=insDob.value;body.address=insAddr.value.trim();}
+  if(ALLOW_ID_SKIP&&insTestNum.value.trim())body.test_number=insTestNum.value.trim(); // TEST ONLY
+  if(FLOW==='background'){ // the call is placed after submit, once the background check has passed
+    delete body.booking;S.insReady=true;S.insPayload=body;save();markInsReady();return;
+  }
+  insBtn.disabled=true;setSt('stIns','run','Starting call…');
+  try{
+    const r=await fetch('/api/insurance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'could not start the call');
+    S.insSubmitted=true;save();showIns(d.status,'dialing');
+  }catch(e){insBtn.disabled=false;setSt('stIns','','Ready');insMsg.textContent='Could not verify: '+e.message;}
+}
+// Live call stages (api/insurance.js deriveStage) — shown while the agent is on the phone
+const INS_STEPS=[['dialing','Calling your insurer'],['menu','Connected — reaching a representative'],['policy_given','Policy number given to representative'],
+  ['reviewing','Representative is reviewing the information'],['active','Policy confirmed active'],
+  ['coverage','Asking if the policy covers the rental'],['confirmed','Representative answered — finishing the call']];
+function insProgress(stage){
+  if(stage==='done'||stage==='finishing')stage='confirmed';
+  const hold=stage==='on_hold';
+  if(hold)stage=insProgress.last||'reviewing'; // show hold on the step we were on
+  else insProgress.last=stage;
+  const at=Math.max(0,INS_STEPS.findIndex(s=>s[0]===stage)),cur=at;
+  return INS_STEPS.map(([k,t],i)=>{
+    const done=i<cur,now=i===cur;
+    const label=now&&hold?'⏸ Call on hold':t;
+    return `<div style="display:flex;gap:10px;align-items:center;padding:5px 0;color:${done?'var(--mint)':now?'var(--ink)':'var(--ink-dim)'};font-weight:${now?600:400}">
+      <span style="width:18px;text-align:center">${done?'✓':now?(hold?'':'<span class="spin" style="border-top-color:var(--blue)"></span>'):'○'}</span>${label}</div>`;
+  }).join('');
+}
+const INS_BADGE={dialing:'Calling insurer…',menu:'Connected',policy_given:'Policy number given',reviewing:'Rep reviewing',on_hold:'Call on hold',
+  active:'Policy active',coverage:'Checking rental coverage',confirmed:'Status confirmed',finishing:'Status confirmed',done:'Status confirmed'};
+
+function showIns(status,stage){
+  insForm.style.display='none';insBtn.style.display='none';
+  if(status==='verified'){S.ins=true;save();setSt('stIns','pass','Covered ✓');insMsg.textContent='Your insurer confirmed your coverage.';toCheckout.disabled=false;return;}
+  if(status==='declined'){setSt('stIns','fail','Not covered');insMsg.textContent='';decline('We couldn\'t confirm insurance coverage for this vehicle.');return;}
+  if(status==='needs_review'){setSt('stIns','run','Under review');insMsg.textContent='We couldn\'t confirm your coverage automatically. Our team will contact you shortly.';return;}
+  setSt('stIns','run',INS_BADGE[stage]||'Calling insurer…');
+  insMsg.innerHTML=`<div style="font-size:13.5px;margin-top:4px">${insProgress(stage||'dialing')}</div>
+    <div style="margin-top:8px">Our assistant is on the phone with your insurer. This can take several minutes — keep this page open.</div>`;
+  clearTimeout(showIns.t);showIns.t=setTimeout(pollIns,3000);
+}
+async function pollIns(){
+  try{
+    const r=await fetch('/api/insurance?booking='+encodeURIComponent(S.booking));
+    if(r.status===404){S.insSubmitted=false;save();insForm.style.display='';insBtn.style.display='';insBtn.disabled=false;setSt('stIns','','Ready');insMsg.textContent='';return;}
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error);
+    showIns(d.status,d.stage);
+  }catch(e){showIns.t=setTimeout(pollIns,8000);}
+}
+function restoreIns(){
+  if(S.ins){insForm.style.display='none';insBtn.style.display='none';setSt('stIns','pass','Covered ✓');toCheckout.disabled=false;}
+  else if(S.insSubmitted)pollIns();
+}
+function setSt(id,cls,txt){const e=document.getElementById(id);e.className='st '+(cls||'');e.textContent=txt;}
+function unlock(card,st){document.getElementById(card).classList.remove('locked');setSt(st,'','Ready');}
+function decline(reason){
+  ['idBtn','idSkip','bgBtn','bgSkip','insBtn'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
+  toCheckout.disabled=true;
+  document.getElementById('declineNote').innerHTML='<div class="clause" style="border-color:rgba(255,93,93,.35);background:#1F1010;color:#F5B8B8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg><span><b>Rental not accepted.</b> '+reason+' You have not been charged. Please try again or contact us.</span></div>'
+    +'<button class="btn mint" style="margin-top:14px" onclick="goHome()">← Go to home</button>';
+}
+// leave a declined booking: start again from the car page with a fresh booking
+function goHome(){
+  clearTimeout(pollPipeline.t);
+  clearTimeout(showBG.t);clearTimeout(showIns.t);
+  try{localStorage.removeItem('apexBk')}catch(e){}
+  location.href=location.pathname;
+}
+
+/* checkout */
+function renderCheckout(){
+  document.getElementById('coSummary').innerHTML=`<div class="summary" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div style="display:flex;justify-content:space-between"><span>Corvette C8 · ${S.days} day${S.days>1?'s':''}</span><b>${money(S.total)}</b></div>
+    <div style="display:flex;justify-content:space-between;color:var(--ink-soft)"><span>📍 ${S.pickup} → ${S.dropoff}</span><span></span></div>
+    <div style="display:flex;justify-content:space-between;color:var(--ink-soft)"><span>Refundable deposit</span><span>${money(DEP)}</span></div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px"><span>Total</span><span class="amt">${money(S.total)}</span></div></div>`;
+}
+async function reserve(){
+  if(!S.id&&!S.idSkipped){alert('Please complete ID verification first.');return;}
+  if(FLOW==='background')return submitBooking();
+  payBtn.disabled=true;payBtn.innerHTML='<span class="spin"></span> Creating booking…';
+  try{
+    const r=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      days:S.days,total:S.total,pickup:S.pickup,dropoff:S.dropoff,name:cName.value,email:cEmail.value,phone:cPhone.value,
+      id_check:S.id?'passed':'skipped'})});
+    const d=await r.json();
+    if(!d.pay_url)throw new Error(d.error||'order failed');
+    localStorage.removeItem('apexBk');
+    window.location.href=d.pay_url; // WooCommerce order-pay → iPOSpays
+  }catch(e){payBtn.disabled=false;payBtn.textContent='Create booking & pay →';alert('Could not create the booking: '+e.message);}
+}
+
+/* background flow: send everything at once; the server runs step 2 then step 3 and emails the result */
+async function submitBooking(){
+  if(!S.bgReady||!S.insReady){alert('Please complete steps 2 and 3 first.');go(2);return;}
+  const email=cEmail.value.trim();
+  if(!cName.value.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){alert('Enter your full name and a valid email — we send the result there.');return;}
+  const body={booking:S.booking,consent_bg:true,days:S.days,total:S.total,pickup:S.pickup,dropoff:S.dropoff,dates:{pickup:S.pDate,return:S.rDate},
+    insurance:Object.assign({consent:true},S.insPayload),contact:{name:cName.value.trim(),email,phone:cPhone.value.trim()}};
+  if(S.id)body.session_id=S.session_id;else body.identity=S.bgIdentity;
+  payBtn.disabled=true;payBtn.innerHTML='<span class="spin"></span> Submitting…';
+  try{
+    const r=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'could not submit');
+    S.submitted=true;S.email=email;save();showSubmitted();
+  }catch(e){payBtn.disabled=false;payBtn.textContent='Submit booking →';alert('Could not submit: '+e.message);}
+}
+const PIPE_STAGE={background_check:'Running your background check',background_review:'Background check — our team is reviewing',
+  insurance_call:'Confirming your insurance with your insurer',payment_link:'Preparing your payment link',done:'Finished'};
+function showSubmitted(){
+  go(4);
+  resultBox.innerHTML=`<div style="font-size:42px">✉️</div><h2 style="margin:10px 0 6px">Thank you — you're all set for now</h2>
+    <p class="sub" style="color:var(--ink-soft)">We're verifying your details in the background. We'll email <b>${(S.email||'you').replace(/[<>&]/g,'')}</b> as soon as it's done —
+    with your payment link if everything checks out. You can close this page.</p>
+    ${ALLOW_ID_SKIP?'<div id="pipeBox" style="text-align:left;margin-top:18px"></div>':''}
+    <button class="btn" style="margin-top:16px" onclick="goHome()">← Go to home</button>`;
+  if(ALLOW_ID_SKIP)pollPipeline();
+}
+// TEST ONLY: watch the background pipeline from the thank-you page
+async function pollPipeline(){
+  clearTimeout(pollPipeline.t);
+  try{
+    const r=await fetch('/api/submit?booking='+encodeURIComponent(S.booking));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json(),esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    const lines=(d.pipeline_log||[]).map(l=>`${new Date(l.t).toLocaleTimeString()}  ${l.m}`).concat(['— TruthFinder —'],(d.tf_log||[]).slice(-12).map(l=>`${new Date(l.t).toLocaleTimeString()}  ${l.m}`));
+    const box=document.getElementById('pipeBox');
+    if(box)box.innerHTML=`<div style="font-size:13px;color:var(--ink-soft);margin-bottom:6px">⚙️ <b>Background progress (test view)</b> — ${esc(d.done?'Finished: '+d.outcome:(PIPE_STAGE[d.stage]||d.stage))}<br>
+      Background: <b>${esc(d.background)}</b> · Insurance: <b>${esc(d.insurance)}</b>${d.insurance_stage?' ('+esc(d.insurance_stage)+')':''} · Emails sent: <b>${esc(d.emails.join(', ')||'none')}</b>
+      ${(d.email_errors||[]).length?`<br><span style="color:var(--red)">Email problems: ${esc(d.email_errors.join(' | '))}</span>`:''}</div>
+      <pre style="margin:0;max-height:260px;overflow:auto;background:#07090c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#b9c2cf;white-space:pre-wrap">${esc(lines.join('\n'))}</pre>`;
+    if(!d.done)pollPipeline.t=setTimeout(pollPipeline,5000);
+  }catch(e){pollPipeline.t=setTimeout(pollPipeline,8000);}
+}
+
+/* boot — handle return from Didit */
+function boot(){
+  // restore dates UI if present
+  if(S.pDate){pDate.value=S.pDate;rDate.value=S.rDate;if(S.pTime)pTime.value=S.pTime;if(S.rTime)rTime.value=S.rTime;calc();}
+  const params=new URLSearchParams(location.search);
+  // recover the session id from the URL if Didit passes it back (fallback when storage is empty)
+  const sidFromUrl=params.get('session_id')||params.get('sid');
+  if(sidFromUrl&&!S.session_id){S.session_id=sidFromUrl;save();}
+  // resume the verification step if we're returning from Didit OR there's a pending, un-verified session
+  const returning=params.get('resume')||sidFromUrl;
+  if(S.session_id&&!S.idSkipped&&(returning||!S.id)){
+    go(2);
+    if(S.id){setSt('stID','pass','Verified ✓');document.getElementById('idBtn').style.display='none';unlockBG();restoreBG();}
+    else pollID();
+    history.replaceState({},'',location.pathname);
+  }else if(S.id){
+    go(2);setSt('stID','pass','Verified ✓');idBtn.style.display='none';unlockBG();restoreBG();
+  }else if(S.idSkipped&&!ALLOW_ID_SKIP){
+    delete S.idSkipped;save();
+  }else if(S.idSkipped){
+    go(2);skipID();restoreBG();
+  }
+  if(ALLOW_ID_SKIP&&!S.id&&!S.idSkipped)idSkip.style.display='';
+  if(FLOW==='background'){
+    payBtn.textContent='Submit booking →';
+    const sub=document.querySelector('[data-step="3"] .sub');
+    if(sub)sub.textContent='Almost done — enter your details and submit. We\'ll run the checks and email you the result with your payment link.';
+    if(S.submitted)showSubmitted();
+  }
+  renderSteps();
+}
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "apex-rental",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Imperium rental verification app — booking UI + /api functions served by dev-server.js",
+  "main": "dev-server.js",
+  "scripts": {
+    "start": "node dev-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright": "1.49.1"
+  }
+}
